@@ -1,0 +1,45 @@
+
+<div class="post">
+    <form method="post">
+        <div class="post-heading">
+            <div class="post-title">
+                {{p.subject}}<br>
+                <b>{{ p.numOfLikes }}</b>
+                <input type="submit" name="Like" value="Like">
+                <input type="submit" name="Unlike" value="Unlike">
+            </div>
+            <div class="post-date">
+                {{p.created.strftime("%b %d, %Y")}}
+            </div>
+        </div>
+
+        <div class="post-content">
+
+            <label>
+                <input hidden name="post_id" value="{{p.key().id()}}">
+            </label>
+            {{p._render_text | safe}}
+            <div>
+                <input type="submit" name="Edit" value="Edit">
+                <input type="submit" name="Delete" value="Delete">
+            </div>
+            <br>
+            <div>
+                <label><b>Comments:</b>
+                    <br>
+                    {% for c in p.render_comment %}
+                       <b> {{ c.user_name }} </b>: &nbsp {{ c.comment | safe }}
+                        <br>
+                        <br>
+                    {% endfor %}
+                </label>
+                <div>
+                    <input type="text" name="comment" value="{{comment}}">
+                    <input type="submit" name="Comment" value="Comment">
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+    
+

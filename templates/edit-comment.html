@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Edit Comment</title>
+    </head>
+    <body>
+    <div class = "post">
+        <form method="post">
+            <label>
+                <input hidden name="c_id" value="{{new_comment.key().id()}}">
+            </label>
+            <div>
+                <input type="text" name="new_comment" value="{{new_comment.comment}}">
+                <input type="submit" name="Update_Comment" value="Update Comment">
+            </div>
+        </form>
+    </div>
+    </body>
+    </html>
+{% endblock %}

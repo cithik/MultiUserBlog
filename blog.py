@@ -189,7 +189,7 @@ class BlogFront(BlogHandler):
                 return self.redirect('/blog/editpost/%s' %
                                      str(self.request.get('post_id')))
             else:
-                error = "user does not have permission to edit/delete"
+                error = "user does not have permission to edit this post"
                 posts = Post.all().order('-created')
                 return self.render("front.html", posts=posts, error=error)
 
@@ -201,7 +201,7 @@ class BlogFront(BlogHandler):
                 post.delete()
                 return self.redirect('/blog')
             else:
-                error = "user does not have permission to edit/delete"
+                error = "user does not have permission to delete this post"
                 posts = Post.all().order('-created')
                 self.render("front.html", posts=posts, error=error)
 
@@ -225,7 +225,7 @@ class BlogFront(BlogHandler):
             comment = db.get(key)
             if self.user.name == comment.user_name:
                 return self.redirect('/blog/editcomment/%s' %
-                                     str(self.request.get('comment_id')))
+                                     str(comment_id))
             else:
                 error = "user does not have permission to edit this comment"
                 posts = Post.all().order('-created')
@@ -292,13 +292,34 @@ class BlogFront(BlogHandler):
 
 class EditComment(BlogHandler):
     def get(self, comment_id):
-
         key = db.Key.from_path('Comment', int(comment_id), parent=blog_key())
         comment = db.get(key)
         if not self.user:
             return self.redirect('/login')
         if self.user.name == comment.user_name:
-            self.render("edit-comment.html", )
+            self.render("edit-comment.html", new_comment=comment)
+
+        else:
+            error = "user does not have permission to edit this comment"
+            posts = Post.all().order('-created')
+            self.render("front.html", posts=posts, error=error)
+
+    def post(self, c_id):
+        key = db.Key.from_path('Comment', int(c_id), parent=blog_key())
+        comment = db.get(key)
+        if not self.user:
+            return self.redirect('/login')
+        if self.user.name == comment.user_name:
+            if self.request.get('Update_Comment'):
+                edited_comment = self.request.get('new_comment')
+                if edited_comment:
+                    comment.comment = edited_comment
+                    comment.put()
+                    return self.redirect('/blog')
+                else:
+                    error = "Enter comment, please!"
+                    posts = Post.all().order('-created')
+                    self.render("front.html", posts=posts, error=error)
         else:
             error = "user does not have permission to edit this comment"
             posts = Post.all().order('-created')

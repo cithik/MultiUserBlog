@@ -640,7 +640,7 @@ class Logout(BlogHandler):
     redirects to SignUp page."""
     def get(self):
         self.logout()
-        self.redirect('/')
+        self.redirect('/login')
 
 
 class Unit3Welcome(BlogHandler):

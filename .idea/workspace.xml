@@ -2,10 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="38dd60f9-9d16-46df-97b7-2c076008fcda" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Google_App_Engine_SDK.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/blog.py" afterPath="$PROJECT_DIR$/blog.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/templates/newpost.html" afterPath="$PROJECT_DIR$/templates/newpost.html" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -30,25 +27,25 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="blog.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="blog.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/blog.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-3690">
-              <caret line="191" column="72" lean-forward="false" selection-start-line="191" selection-start-column="72" selection-end-line="191" selection-end-column="72" />
+            <state relative-caret-position="405">
+              <caret line="169" column="62" lean-forward="false" selection-start-line="169" selection-start-column="62" selection-end-line="169" selection-end-column="62" />
               <folding>
                 <element signature="e#0#14#0" expanded="true" />
-                <marker date="1482818350000" expanded="true" signature="7775:7811" ph="select user Like" />
-                <marker date="1482818350000" expanded="true" signature="8880:8916" ph="select user Like" />
-                <marker date="1482818350000" expanded="true" signature="9254:9338" ph="select * fro... Likemissing_value" />
-                <marker date="1482818350000" expanded="true" signature="14484:14520" ph="select user Like" />
-                <marker date="1482818350000" expanded="true" signature="15582:15653" ph="select user Like" />
-                <marker date="1482818350000" expanded="true" signature="15959:16043" ph="select * fro... Likemissing_value" />
+                <marker date="1482868712000" expanded="true" signature="8201:8237" ph="select user Like" />
+                <marker date="1482868712000" expanded="true" signature="9306:9342" ph="select user Like" />
+                <marker date="1482868712000" expanded="true" signature="9680:9764" ph="select * fro... Likemissing_value" />
+                <marker date="1482868712000" expanded="true" signature="15463:15499" ph="select user Like" />
+                <marker date="1482868712000" expanded="true" signature="16561:16632" ph="select user Like" />
+                <marker date="1482868712000" expanded="true" signature="16938:17022" ph="select * fro... Likemissing_value" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="newpost.html" pinned="false" current-in-tab="true">
+      <file leaf-file-name="newpost.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/newpost.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="255">
@@ -77,8 +74,8 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/templates/edit-comment.html" />
-        <option value="$PROJECT_DIR$/blog.py" />
         <option value="$PROJECT_DIR$/templates/newpost.html" />
+        <option value="$PROJECT_DIR$/blog.py" />
       </list>
     </option>
   </component>
@@ -478,27 +475,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/blog.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-3690">
-          <caret line="191" column="72" lean-forward="false" selection-start-line="191" selection-start-column="72" selection-end-line="191" selection-end-column="72" />
-          <folding>
-            <element signature="e#0#14#0" expanded="true" />
-            <marker date="1482818350000" expanded="true" signature="7775:7811" ph="select user Like" />
-            <marker date="1482818350000" expanded="true" signature="8880:8916" ph="select user Like" />
-            <marker date="1482818350000" expanded="true" signature="9254:9338" ph="select * fro... Likemissing_value" />
-            <marker date="1482818350000" expanded="true" signature="14484:14520" ph="select user Like" />
-            <marker date="1482818350000" expanded="true" signature="15582:15653" ph="select user Like" />
-            <marker date="1482818350000" expanded="true" signature="15959:16043" ph="select * fro... Likemissing_value" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/templates/newpost.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="255">
           <caret line="17" column="58" lean-forward="false" selection-start-line="17" selection-start-column="58" selection-end-line="17" selection-end-column="58" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/blog.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="169" column="62" lean-forward="false" selection-start-line="169" selection-start-column="62" selection-end-line="169" selection-end-column="62" />
+          <folding>
+            <element signature="e#0#14#0" expanded="true" />
+            <marker date="1482868712000" expanded="true" signature="8201:8237" ph="select user Like" />
+            <marker date="1482868712000" expanded="true" signature="9306:9342" ph="select user Like" />
+            <marker date="1482868712000" expanded="true" signature="9680:9764" ph="select * fro... Likemissing_value" />
+            <marker date="1482868712000" expanded="true" signature="15463:15499" ph="select user Like" />
+            <marker date="1482868712000" expanded="true" signature="16561:16632" ph="select user Like" />
+            <marker date="1482868712000" expanded="true" signature="16938:17022" ph="select * fro... Likemissing_value" />
+          </folding>
         </state>
       </provider>
     </entry>

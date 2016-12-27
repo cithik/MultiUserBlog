@@ -30,6 +30,8 @@ def check_secure_val(secure_val):
     if secure_val == make_secure_val(val):
         return val
 
+""" This class contains all the methods for the session variables. """
+
 
 class BlogHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
@@ -94,8 +96,11 @@ def users_key(group='default'):
     return db.Key.from_path('users', group)
 
 
-# User Model
+''' User DB Model '''
+
+
 class User(db.Model):
+
     name = db.StringProperty(required=True)
     pw_hash = db.StringProperty(required=True)
     email = db.StringProperty()
@@ -131,7 +136,7 @@ def blog_key(name='default'):
     return db.Key.from_path('blogs', name)
 
 
-#  Comment model #
+""" Comment model """
 
 
 class Comment(db.Model):
@@ -141,7 +146,7 @@ class Comment(db.Model):
     created = db.DateTimeProperty(auto_now_add=True)
 
 
-# Like Model #
+""" Like Model """
 
 
 class Like(db.Model):
@@ -149,7 +154,7 @@ class Like(db.Model):
     post_id = db.IntegerProperty(required=True)
 
 
-# Post model
+"""" Post model """
 
 
 class Post(db.Model):
@@ -161,6 +166,9 @@ class Post(db.Model):
     numOfLikes = db.IntegerProperty(required=True)
 
     def render(self):
+        """
+        This method is called whenever front.html is rendered.
+        """
         self._render_text = self.content.replace('\n', '<br>')
         self.render_comment = Comment.gql("where post_id=" +
                                           str(self.key().id()))
@@ -171,6 +179,7 @@ class Post(db.Model):
 
 
 class BlogFront(BlogHandler):
+    """ This get method is called when /blog is hit. """
     def get(self):
         if not self.user:
             return self.redirect('/login')
@@ -178,6 +187,9 @@ class BlogFront(BlogHandler):
         self.render('front.html', posts=posts)
 
     def post(self):
+        """ This post method defines the functionality for Edit_Post,
+         Delete_Post, Comment, Edit_Comment, Delete_Comment,
+          Like and UnLike Buttons on /blog page. """
         if not self.user:
             return self.redirect('/login')
 
@@ -291,7 +303,10 @@ class BlogFront(BlogHandler):
 
 
 class EditComment(BlogHandler):
+
     def get(self, comment_id):
+        """ This get method is called when /blog/editcomment/%s is hit.
+         It renders the edit-comment.html page. """
         key = db.Key.from_path('Comment', int(comment_id), parent=blog_key())
         comment = db.get(key)
         if not self.user:
@@ -305,6 +320,8 @@ class EditComment(BlogHandler):
             self.render("front.html", posts=posts, error=error)
 
     def post(self, c_id):
+        """ This post method is called when Update_Comment button is hit.
+         It updates the Comment DB with the new comment. """
         key = db.Key.from_path('Comment', int(c_id), parent=blog_key())
         comment = db.get(key)
         if not self.user:
@@ -331,6 +348,8 @@ class EditComment(BlogHandler):
 
 class PostPage(BlogHandler):
     def get(self, post_id):
+        """ This get method is called after a new post is created or
+         when a user wants to edit a post."""
         if not self.user:
             return self.redirect('/login')
         key = db.Key.from_path('Post', int(post_id), parent=blog_key())
@@ -342,6 +361,9 @@ class PostPage(BlogHandler):
         self.render("permalink.html", post=post)
 
     def post(self, post_id):
+        """ This post method is called when a user wants to perform
+         Edit_Post, Edit_Comment, Delete_Post, Delete_Comment, Like,
+          Unlike from Permalink page."""
         if not self.user:
             return self.redirect('/login')
 
@@ -452,6 +474,8 @@ class PostPage(BlogHandler):
 # Handler for editing a post
 class EditPost(BlogHandler):
     def get(self, post_id):
+        """ This get method is called when /blog/editpost/%s is hit.
+                 It renders the newpost.html page. """
         if not self.user:
             self.redirect('/login')
         key = db.Key.from_path('Post', int(post_id), parent=blog_key())
@@ -459,6 +483,8 @@ class EditPost(BlogHandler):
         self.render("newpost.html", subject=post.subject, content=post.content)
 
     def post(self, post_id):
+        """ This post method is called when Update_Post button is hit.
+                It updates the Post DB with the new post. """
         if not self.user:
             return self.redirect('/blog')
         subject = self.request.get('subject')
@@ -482,12 +508,16 @@ class EditPost(BlogHandler):
 
 class NewPost(BlogHandler):
     def get(self):
+        """ This get method is called when a user wants
+         to create a new post. """
         if self.user:
             self.render("newpost.html")
         else:
             return self.redirect("/login")
 
     def post(self):
+        """ This post method is called when a user enters the
+         post fields and hits Submit. """
         if not self.user:
             return self.redirect('/blog')
 
@@ -531,9 +561,11 @@ def valid_email(email):
 
 class Signup(BlogHandler):
     def get(self):
+        """ This get method displays the SignUp form. """
         self.render("signup-form.html")
 
     def post(self):
+        """ This post method takes in SignUp fields and verifies them. """
         have_error = False
         self.username = self.request.get('username')
         self.password = self.request.get('password')
@@ -569,7 +601,8 @@ class Signup(BlogHandler):
 
 class Register(Signup):
     def done(self):
-        # make sure the user doesn't already exist
+        """ This method checks if user already exists. If not,
+         it enters the user in the DB. """
         u = User.by_name(self.username)
         if u:
             msg = 'That user already exists.'
@@ -583,10 +616,13 @@ class Register(Signup):
 
 
 class Login(BlogHandler):
+    """ This method is called when Login is clicked. """
     def get(self):
         self.render('login-form.html')
 
     def post(self):
+        """This post method takes in Login arguments and
+         checks against DB and displays welcome page. """
         username = self.request.get('username')
         password = self.request.get('password')
 
@@ -600,12 +636,16 @@ class Login(BlogHandler):
 
 
 class Logout(BlogHandler):
+    """ This method ends the session of a user and
+    redirects to SignUp page."""
     def get(self):
         self.logout()
         self.redirect('/')
 
 
 class Unit3Welcome(BlogHandler):
+    """ This method is called when a user logs in and
+    displays the welcome page. """
     def get(self):
         if self.user:
             self.render('welcome.html', username=self.user.name)

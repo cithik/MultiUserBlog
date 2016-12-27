@@ -486,7 +486,7 @@ class EditPost(BlogHandler):
         """ This post method is called when Update_Post button is hit.
                 It updates the Post DB with the new post. """
         if not self.user:
-            return self.redirect('/blog')
+            return self.redirect('/login')
         subject = self.request.get('subject')
         content = self.request.get('content')
 
@@ -519,7 +519,7 @@ class NewPost(BlogHandler):
         """ This post method is called when a user enters the
          post fields and hits Submit. """
         if not self.user:
-            return self.redirect('/blog')
+            return self.redirect('/login')
 
         subject = self.request.get('subject')
         content = self.request.get('content')

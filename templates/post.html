@@ -20,15 +20,21 @@
             </label>
             {{p._render_text | safe}}
             <div>
-                <input type="submit" name="Edit" value="Edit">
-                <input type="submit" name="Delete" value="Delete">
+                <input type="submit" name="Edit_Post" value="Edit Post">
+                <input type="submit" name="Delete_Post" value="Delete Post">
             </div>
             <br>
             <div>
                 <label><b>Comments:</b>
                     <br>
                     {% for c in p.render_comment %}
-                       <b> {{ c.user_name }} </b>: &nbsp {{ c.comment | safe }}
+                        <b> {{ c.user_name }} </b>: &nbsp {{ c.comment | safe }}
+                        <label>
+                            <input hidden name="c_id" value="{{c.key().id()}}">
+                        </label>
+                        <input type="submit" name="Edit_Comment" value="Edit Comment">
+                        <input type="submit" name="Delete_Comment" value="Delete Comment">
+
                         <br>
                         <br>
                     {% endfor %}

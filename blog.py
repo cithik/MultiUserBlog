@@ -93,6 +93,7 @@ def valid_pw(name, password, h):
 def users_key(group='default'):
     return db.Key.from_path('users', group)
 
+
 # User Model
 class User(db.Model):
     name = db.StringProperty(required=True)
@@ -123,10 +124,12 @@ class User(db.Model):
             return u
 
 
-##### blog stuff
+""" blog stuff """
+
 
 def blog_key(name='default'):
     return db.Key.from_path('blogs', name)
+
 
 #  Comment model #
 
@@ -137,12 +140,14 @@ class Comment(db.Model):
     post_id = db.IntegerProperty(required=True)
     created = db.DateTimeProperty(auto_now_add=True)
 
+
 # Like Model #
 
 
 class Like(db.Model):
     user = db.IntegerProperty(required=True)
     post_id = db.IntegerProperty(required=True)
+
 
 # Post model
 
@@ -157,8 +162,10 @@ class Post(db.Model):
 
     def render(self):
         self._render_text = self.content.replace('\n', '<br>')
-        self.render_comment = Comment.gql("where post_id=" + str(self.key().id()))
+        self.render_comment = Comment.gql("where post_id=" +
+                                          str(self.key().id()))
         return render_str("post.html", p=self)
+
 
 # Handler for /blog
 
@@ -166,55 +173,83 @@ class Post(db.Model):
 class BlogFront(BlogHandler):
     def get(self):
         if not self.user:
-            self.redirect('/login')
+            return self.redirect('/login')
         posts = Post.all().order('-created')
         self.render('front.html', posts=posts)
 
     def post(self):
         if not self.user:
-            self.redirect('/login')
+            return self.redirect('/login')
 
-        if self.request.get('Edit'):
+        if self.request.get('Edit_Post'):
             post_id = self.request.get('post_id')
             key = db.Key.from_path('Post', int(post_id), parent=blog_key())
             post = db.get(key)
             if self.user.key().id() == post.user:
-                print self.request.get('post_id')
-                self.redirect('/blog/editpost/%s' % str(self.request.get('post_id')))
+                return self.redirect('/blog/editpost/%s' %
+                                     str(self.request.get('post_id')))
             else:
                 error = "user does not have permission to edit/delete"
                 posts = Post.all().order('-created')
-                self.render("front.html", posts=posts, error=error)
+                return self.render("front.html", posts=posts, error=error)
 
-        if self.request.get('Delete'):
+        if self.request.get('Delete_Post'):
             post_id = self.request.get('post_id')
             key = db.Key.from_path('Post', int(post_id), parent=blog_key())
             post = db.get(key)
             if self.user.key().id() == post.user:
                 post.delete()
-                self.redirect('/blog')
+                return self.redirect('/blog')
             else:
                 error = "user does not have permission to edit/delete"
                 posts = Post.all().order('-created')
                 self.render("front.html", posts=posts, error=error)
 
-        if self.request.get('comment'):
+        if self.request.get('Comment'):
             comment = self.request.get('comment')
             if comment:
-                c = Comment(parent=blog_key(), user_name=self.user.name, post_id=long(self.request.get('post_id')),
+                c = Comment(parent=blog_key(), user_name=self.user.name,
+                            post_id=long(self.request.get('post_id')),
                             comment=comment)
                 c.put()
-                self.redirect('/blog')
+                return self.redirect('/blog')
             else:
                 error = "Enter comment, please!"
                 posts = Post.all().order('-created')
-                self.render("post.html", posts=posts, error=error)
+                self.render("front.html", posts=posts, error=error)
+
+        if self.request.get('Edit_Comment'):
+            comment_id = self.request.get('c_id')
+            key = db.Key.from_path('Comment', int(comment_id),
+                                   parent=blog_key())
+            comment = db.get(key)
+            if self.user.name == comment.user_name:
+                return self.redirect('/blog/editcomment/%s' %
+                                     str(self.request.get('comment_id')))
+            else:
+                error = "user does not have permission to edit this comment"
+                posts = Post.all().order('-created')
+                self.render("front.html", posts=posts, error=error)
+
+        if self.request.get('Delete_Comment'):
+            comment_id = self.request.get('c_id')
+            key = db.Key.from_path('Comment', int(comment_id),
+                                   parent=blog_key())
+            comment = db.get(key)
+            if self.user.name == comment.user_name:
+                comment.delete()
+                return self.redirect('/blog')
+            else:
+                error = "user does not have permission to delete this comment"
+                posts = Post.all().order('-created')
+                self.render("front.html", posts=posts, error=error)
 
         if self.request.get('Like'):
             post_id = self.request.get('post_id')
             key = db.Key.from_path('Post', int(post_id), parent=blog_key())
             post = db.get(key)
-            users = db.GqlQuery("select user from Like where post_id=" + str(post.key().id()))
+            users = db.GqlQuery("select user from Like where post_id=" +
+                                str(post.key().id()))
             if not self.user.key().id() == post.user:
                 user_exists = False
                 for u in users:
@@ -224,9 +259,10 @@ class BlogFront(BlogHandler):
                 if not user_exists:
                     post.numOfLikes += 1
                     db.put(post)
-                    l = Like(parent=blog_key(), user=self.user.key().id(), post_id=int(post_id))
+                    l = Like(parent=blog_key(), user=self.user.key().id(),
+                             post_id=int(post_id))
                     l.put()
-                self.redirect('/blog')
+                return self.redirect('/blog')
             else:
                 error = "user does not have permission to like his own post"
                 posts = Post.all().order('-created')
@@ -236,74 +272,121 @@ class BlogFront(BlogHandler):
             post_id = self.request.get('post_id')
             key = db.Key.from_path('Post', int(post_id), parent=blog_key())
             post = db.get(key)
-            users = db.GqlQuery("select user from Like where post_id=" + str(post.key().id()))
+            users = db.GqlQuery("select user from Like where post_id=" +
+                                str(post.key().id()))
             if not self.user.key().id() == post.user:
                 for u in users:
                     if self.user.key().id() == int(u.user):
                         post.numOfLikes -= 1
                         db.put(post)
-                        current_user = db.GqlQuery("select * from Like where user=" + str(self.user.key().id()))
+                        current_user = db.GqlQuery("select * from Like"
+                                                   " where user=" +
+                                                   str(self.user.key().id()))
                         db.delete(current_user)
-                        break
-                self.redirect('/blog')
+                return self.redirect('/blog')
             else:
                 error = "user does not have permission to unlike his own post"
                 posts = Post.all().order('-created')
                 self.render("front.html", posts=posts, error=error)
 
-# Handler for permalink
+
+class EditComment(BlogHandler):
+    def get(self, comment_id):
+
+        key = db.Key.from_path('Comment', int(comment_id), parent=blog_key())
+        comment = db.get(key)
+        if not self.user:
+            return self.redirect('/login')
+        if self.user.name == comment.user_name:
+            self.render("edit-comment.html", )
+        else:
+            error = "user does not have permission to edit this comment"
+            posts = Post.all().order('-created')
+            self.render("front.html", posts=posts, error=error)
+
+
+""" Handler for permalink """
 
 
 class PostPage(BlogHandler):
     def get(self, post_id):
         if not self.user:
-            self.redirect('/login')
+            return self.redirect('/login')
         key = db.Key.from_path('Post', int(post_id), parent=blog_key())
         post = db.get(key)
         if not post:
             self.error(404)
             return
 
-        self.render("permalink.html", post=post, )
+        self.render("permalink.html", post=post)
 
     def post(self, post_id):
         if not self.user:
-            self.redirect('/login')
+            return self.redirect('/login')
 
-        if self.request.get('Edit'):
+        if self.request.get('Edit_Post'):
             key = db.Key.from_path('Post', int(post_id), parent=blog_key())
             post = db.get(key)
             if self.user.key().id() == post.user:
                 print self.request.get('post_id')
-                self.redirect('/blog/editpost/%s' % str(self.request.get('post_id')))
+                self.redirect('/blog/editpost/%s' %
+                              str(self.request.get('post_id')))
             else:
                 error = "user does not have permission"
                 self.render("front.html", error=error)
 
-        if self.request.get('comment'):
+        if self.request.get('Comment'):
             comment = self.request.get('comment')
             if comment:
-                c = Comment(parent=blog_key(), user_name=self.user.name, post_id=long(self.request.get('post_id')),
+                c = Comment(parent=blog_key(), user_name=self.user.name,
+                            post_id=long(self.request.get('post_id')),
                             comment=comment)
                 c.put()
-                self.redirect('/blog')
+                return self.redirect('/blog')
             else:
                 error = "Enter comment, please!"
                 posts = Post.all().order('-created')
                 self.render("post.html", posts=posts, error=error)
 
-        if self.request.get('Delete'):
+        if self.request.get('Edit_Comment'):
+            post_id = self.request.get('post_id')
+            key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+            post = db.get(key)
+            if self.user.key().id() == post.user:
+                print self.request.get('post_id')
+                self.redirect('/blog/editpost/%s' %
+                              str(self.request.get('post_id')))
+            else:
+                error = "user does not have permission to edit/delete"
+                posts = Post.all().order('-created')
+                self.render("front.html", posts=posts, error=error)
+
+        if self.request.get('Delete_Comment'):
+            comment_id = self.request.get('c_id')
+            key = db.Key.from_path('Comment', int(comment_id),
+                                   parent=blog_key())
+            comment = db.get(key)
+            if self.user.name == comment.user_name:
+                comment.delete()
+                return self.redirect('/blog')
+            else:
+                error = "user does not have permission to delete this comment"
+                posts = Post.all().order('-created')
+                self.render("front.html", posts=posts, error=error)
+
+        if self.request.get('Delete_Post'):
             post_id = self.request.get('post_id')
             key = db.Key.from_path('Post', int(post_id), parent=blog_key())
             post = db.get(key)
             post.delete()
-            self.redirect('/blog')
+            return self.redirect('/blog')
 
         if self.request.get('Like'):
             post_id = self.request.get('post_id')
             key = db.Key.from_path('Post', int(post_id), parent=blog_key())
             post = db.get(key)
-            users = db.GqlQuery("select user from Like where post_id=" + str(post.key().id()))
+            users = db.GqlQuery("select user from Like where post_id=" +
+                                str(post.key().id()))
             if not self.user.key().id() == post.user:
                 user_exists = False
                 for u in users:
@@ -313,7 +396,8 @@ class PostPage(BlogHandler):
                 if not user_exists:
                     post.numOfLikes += 1
                     db.put(post)
-                    l = Like(parent=blog_key(), user=self.user.key().id(), post_id=int(post_id))
+                    l = Like(parent=blog_key(), user=self.user.key().id(),
+                             post_id=int(post_id))
                     l.put()
                 self.redirect('/blog')
             else:
@@ -325,16 +409,19 @@ class PostPage(BlogHandler):
             post_id = self.request.get('post_id')
             key = db.Key.from_path('Post', int(post_id), parent=blog_key())
             post = db.get(key)
-            users = db.GqlQuery("select user from Like where post_id=" + str(post.key().id()))
+            users = db.GqlQuery("select user from Like where"
+                                " post_id=" + str(post.key().id()))
             if not self.user.key().id() == post.user:
                 for u in users:
                     if self.user.key().id() == int(u.user):
                         post.numOfLikes -= 1
                         db.put(post)
-                        current_user = db.GqlQuery("select * from Like where user=" + str(self.user.key().id()))
+                        current_user = db.GqlQuery("select * from Like"
+                                                   " where user=" +
+                                                   str(self.user.key().id()))
                         db.delete(current_user)
                         break
-                self.redirect('/blog')
+                return self.redirect('/blog')
             else:
                 error = "user does not have permission to unlike his own post"
                 posts = Post.all().order('-created')
@@ -352,8 +439,7 @@ class EditPost(BlogHandler):
 
     def post(self, post_id):
         if not self.user:
-            self.redirect('/blog')
-
+            return self.redirect('/blog')
         subject = self.request.get('subject')
         content = self.request.get('content')
 
@@ -363,10 +449,11 @@ class EditPost(BlogHandler):
             post.subject = subject
             post.content = content
             post.put()
-            self.redirect('/blog')
+            return self.redirect('/blog')
         else:
             error = "subject and content, please!"
-            self.render("newpost.html", subject=subject, content=content, error=error)
+            self.render("newpost.html", subject=subject, content=content,
+                        error=error)
 
 
 # Handler for creating a post
@@ -377,22 +464,27 @@ class NewPost(BlogHandler):
         if self.user:
             self.render("newpost.html")
         else:
-            self.redirect("/login")
+            return self.redirect("/login")
 
     def post(self):
         if not self.user:
-            self.redirect('/blog')
+            return self.redirect('/blog')
 
         subject = self.request.get('subject')
         content = self.request.get('content')
 
         if subject and content:
-            p = Post(parent=blog_key(), user=self.user.key().id(), subject=subject, content=content, numOfLikes=0)
+            p = Post(parent=blog_key(), user=self.user.key().id(),
+                     subject=subject, content=content, numOfLikes=0)
             p.put()
             self.redirect('/blog/%s' % str(p.key().id()))
         else:
             error = "subject and content, please!"
-            self.render("newpost.html", subject=subject, content=content, error=error)
+            self.render("newpost.html", subject=subject, content=content,
+                        error=error)
+
+        if self.request.get('Cancel'):
+            return self.redirect('/blog')
 
 
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
@@ -505,6 +597,7 @@ app = webapp2.WSGIApplication([('/', Register),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPost),
                                ('/blog/editpost/([0-9]+)', EditPost),
+                               ('/blog/editcomment/([0-9]+)', EditComment),
                                ('/login', Login),
                                ('/logout', Logout),
                                ('/welcome', Unit3Welcome),

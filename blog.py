@@ -193,30 +193,6 @@ class BlogFront(BlogHandler):
         if not self.user:
             return self.redirect('/login')
 
-        if self.request.get('Edit_Post'):
-            post_id = self.request.get('post_id')
-            key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-            post = db.get(key)
-            if self.user.key().id() == post.user:
-                return self.redirect('/blog/editpost/%s' %
-                                     str(self.request.get('post_id')))
-            else:
-                error = "user does not have permission to edit this post"
-                posts = Post.all().order('-created')
-                return self.render("front.html", posts=posts, error=error)
-
-        if self.request.get('Delete_Post'):
-            post_id = self.request.get('post_id')
-            key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-            post = db.get(key)
-            if self.user.key().id() == post.user:
-                post.delete()
-                return self.redirect('/blog')
-            else:
-                error = "user does not have permission to delete this post"
-                posts = Post.all().order('-created')
-                self.render("front.html", posts=posts, error=error)
-
         if self.request.get('Comment'):
             comment = self.request.get('comment')
             if comment:
@@ -227,32 +203,6 @@ class BlogFront(BlogHandler):
                 return self.redirect('/blog')
             else:
                 error = "Enter comment, please!"
-                posts = Post.all().order('-created')
-                self.render("front.html", posts=posts, error=error)
-
-        if self.request.get('Edit_Comment'):
-            comment_id = self.request.get('c_id')
-            key = db.Key.from_path('Comment', int(comment_id),
-                                   parent=blog_key())
-            comment = db.get(key)
-            if self.user.name == comment.user_name:
-                return self.redirect('/blog/editcomment/%s' %
-                                     str(comment_id))
-            else:
-                error = "user does not have permission to edit this comment"
-                posts = Post.all().order('-created')
-                self.render("front.html", posts=posts, error=error)
-
-        if self.request.get('Delete_Comment'):
-            comment_id = self.request.get('c_id')
-            key = db.Key.from_path('Comment', int(comment_id),
-                                   parent=blog_key())
-            comment = db.get(key)
-            if self.user.name == comment.user_name:
-                comment.delete()
-                return self.redirect('/blog')
-            else:
-                error = "user does not have permission to delete this comment"
                 posts = Post.all().order('-created')
                 self.render("front.html", posts=posts, error=error)
 
@@ -309,13 +259,17 @@ class EditComment(BlogHandler):
          It renders the edit-comment.html page. """
         key = db.Key.from_path('Comment', int(comment_id), parent=blog_key())
         comment = db.get(key)
-        if not self.user:
-            return self.redirect('/login')
-        if self.user.name == comment.user_name:
-            self.render("edit-comment.html", new_comment=comment)
-
+        if comment:
+            if not self.user:
+                return self.redirect('/login')
+            if self.user.name == comment.user_name:
+                self.render("edit-comment.html", new_comment=comment)
+            else:
+                error = "user does not have permission to edit this comment"
+                posts = Post.all().order('-created')
+                self.render("front.html", posts=posts, error=error)
         else:
-            error = "user does not have permission to edit this comment"
+            error = "comment does not exist"
             posts = Post.all().order('-created')
             self.render("front.html", posts=posts, error=error)
 
@@ -324,24 +278,51 @@ class EditComment(BlogHandler):
          It updates the Comment DB with the new comment. """
         key = db.Key.from_path('Comment', int(c_id), parent=blog_key())
         comment = db.get(key)
-        if not self.user:
-            return self.redirect('/login')
-        if self.user.name == comment.user_name:
-            if self.request.get('Update_Comment'):
-                edited_comment = self.request.get('new_comment')
-                if edited_comment:
-                    comment.comment = edited_comment
-                    comment.put()
-                    return self.redirect('/blog')
-                else:
-                    error = "Enter comment, please!"
-                    posts = Post.all().order('-created')
-                    self.render("front.html", posts=posts, error=error)
+        if comment:
+            if not self.user:
+                return self.redirect('/login')
+            if self.user.name == comment.user_name:
+                if self.request.get('Update_Comment'):
+                    edited_comment = self.request.get('new_comment')
+                    if edited_comment:
+                        comment.comment = edited_comment
+                        comment.put()
+                        return self.redirect('/blog')
+                    else:
+                        error = "Enter comment, please!"
+                        posts = Post.all().order('-created')
+                        self.render("front.html", posts=posts, error=error)
+            else:
+                error = "user does not have permission to edit this comment"
+                posts = Post.all().order('-created')
+                self.render("front.html", posts=posts, error=error)
         else:
-            error = "user does not have permission to edit this comment"
+            error = "comment does not exist"
             posts = Post.all().order('-created')
             self.render("front.html", posts=posts, error=error)
 
+
+class DeleteComment(BlogHandler):
+
+    def get(self, comment_id):
+        """ This get method is called when /blog/deletecomment/%s is hit.
+          """
+        key = db.Key.from_path('Comment', int(comment_id), parent=blog_key())
+        comment = db.get(key)
+        if comment:
+            if not self.user:
+                return self.redirect('/login')
+            if self.user.name == comment.user_name:
+                comment.delete()
+                return self.redirect('/blog')
+            else:
+                error = "user does not have permission to delete this comment"
+                posts = Post.all().order('-created')
+                self.render("front.html", posts=posts, error=error)
+        else:
+            error = "comment does not exist"
+            posts = Post.all().order('-created')
+            self.render("front.html", posts=posts, error=error)
 
 """ Handler for permalink """
 
@@ -367,17 +348,6 @@ class PostPage(BlogHandler):
         if not self.user:
             return self.redirect('/login')
 
-        if self.request.get('Edit_Post'):
-            key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-            post = db.get(key)
-            if self.user.key().id() == post.user:
-                print self.request.get('post_id')
-                self.redirect('/blog/editpost/%s' %
-                              str(self.request.get('post_id')))
-            else:
-                error = "user does not have permission"
-                self.render("front.html", error=error)
-
         if self.request.get('Comment'):
             comment = self.request.get('comment')
             if comment:
@@ -390,39 +360,6 @@ class PostPage(BlogHandler):
                 error = "Enter comment, please!"
                 posts = Post.all().order('-created')
                 self.render("post.html", posts=posts, error=error)
-
-        if self.request.get('Edit_Comment'):
-            post_id = self.request.get('post_id')
-            key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-            post = db.get(key)
-            if self.user.key().id() == post.user:
-                print self.request.get('post_id')
-                self.redirect('/blog/editpost/%s' %
-                              str(self.request.get('post_id')))
-            else:
-                error = "user does not have permission to edit/delete"
-                posts = Post.all().order('-created')
-                self.render("front.html", posts=posts, error=error)
-
-        if self.request.get('Delete_Comment'):
-            comment_id = self.request.get('c_id')
-            key = db.Key.from_path('Comment', int(comment_id),
-                                   parent=blog_key())
-            comment = db.get(key)
-            if self.user.name == comment.user_name:
-                comment.delete()
-                return self.redirect('/blog')
-            else:
-                error = "user does not have permission to delete this comment"
-                posts = Post.all().order('-created')
-                self.render("front.html", posts=posts, error=error)
-
-        if self.request.get('Delete_Post'):
-            post_id = self.request.get('post_id')
-            key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-            post = db.get(key)
-            post.delete()
-            return self.redirect('/blog')
 
         if self.request.get('Like'):
             post_id = self.request.get('post_id')
@@ -480,30 +417,72 @@ class EditPost(BlogHandler):
             self.redirect('/login')
         key = db.Key.from_path('Post', int(post_id), parent=blog_key())
         post = db.get(key)
-        self.render("newpost.html", subject=post.subject, content=post.content)
+        if post:
+            if self.user.key().id() == post.user:
+                self.render("newpost.html", subject=post.subject,
+                            content=post.content)
+            else:
+                error = "user does not have permission to edit this post"
+                posts = Post.all().order('-created')
+                self.render("front.html", posts=posts, error=error)
+        else:
+            error = "post does not exist"
+            posts = Post.all().order('-created')
+            self.render("front.html", posts=posts, error=error)
 
     def post(self, post_id):
         """ This post method is called when Update_Post button is hit.
                 It updates the Post DB with the new post. """
         if not self.user:
             return self.redirect('/login')
-        subject = self.request.get('subject')
-        content = self.request.get('content')
-
-        if subject and content:
-            key = db.Key.from_path('Post', int(post_id), parent=blog_key())
-            post = db.get(key)
-            post.subject = subject
-            post.content = content
-            post.put()
-            return self.redirect('/blog')
+        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        post = db.get(key)
+        if post:
+            subject = self.request.get('subject')
+            content = self.request.get('content')
+            if self.user.key().id() == post.user:
+                if subject and content:
+                    key = db.Key.from_path('Post', int(post_id),
+                                           parent=blog_key())
+                    post = db.get(key)
+                    post.subject = subject
+                    post.content = content
+                    post.put()
+                    return self.redirect('/blog')
+                else:
+                    error = "subject and content, please!"
+                    self.render("newpost.html", subject=subject,
+                                content=content,
+                                error=error)
+            else:
+                error = "user does not have permission to edit this post"
+                posts = Post.all().order('-created')
+                self.render("front.html", posts=posts, error=error)
         else:
-            error = "subject and content, please!"
-            self.render("newpost.html", subject=subject, content=content,
-                        error=error)
+            error = "post does not exist"
+            posts = Post.all().order('-created')
+            self.render("front.html", posts=posts, error=error)
 
 
-# Handler for creating a post
+class DeletePost(BlogHandler):
+    def get(self, post_id):
+        """ This get method is called when /blog/deletepost/%s is hit. """
+        key = db.Key.from_path('Post', int(post_id), parent=blog_key())
+        post = db.get(key)
+        if post:
+            if not self.user:
+                self.redirect('/login')
+            if self.user.key().id() == post.user:
+                post.delete()
+                return self.redirect('/blog')
+            else:
+                error = "user does not have permission to delete this post"
+                posts = Post.all().order('-created')
+                self.render("front.html", posts=posts, error=error)
+        else:
+            error = "post does not exist"
+            posts = Post.all().order('-created')
+            self.render("front.html", posts=posts, error=error)
 
 
 class NewPost(BlogHandler):
@@ -531,7 +510,8 @@ class NewPost(BlogHandler):
             self.redirect('/blog/%s' % str(p.key().id()))
         else:
             error = "subject and content, please!"
-            self.render("newpost.html", subject=subject, content=content,
+            self.render("newpost.html", subject=subject,
+                        content=content,
                         error=error)
 
         if self.request.get('Cancel'):
@@ -658,7 +638,9 @@ app = webapp2.WSGIApplication([('/', Register),
                                ('/blog/([0-9]+)', PostPage),
                                ('/blog/newpost', NewPost),
                                ('/blog/editpost/([0-9]+)', EditPost),
+                               ('/blog/deletepost/([0-9]+)', DeletePost),
                                ('/blog/editcomment/([0-9]+)', EditComment),
+                               ('/blog/deletecomment/([0-9]+)', DeleteComment),
                                ('/login', Login),
                                ('/logout', Logout),
                                ('/welcome', Unit3Welcome),
